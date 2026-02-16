@@ -1,7 +1,6 @@
 # 📉 Linear Regression from Scratch using Gradient Descent
 
 ![Python](https://img.shields.io/badge/Python-3.10%2B-blue)
-![Status](https://img.shields.io/badge/Status-Completed-success)
 
 > **A vectorized, modular implementation of Linear Regression using Gradient Descent, benchmarked against Scikit-Learn in high-dimensional biological scenarios.**
 
@@ -25,20 +24,36 @@ To address this, this project explores the use of **Gradient Descent** as an ite
 
 ## Theoretical Foundation & Algorithm
 
-### Gradient Descent vs. Analytical Solution
-The standard OLS approach solves the regression problem by finding the point where the derivative of the cost function is zero using the **Normal Equation**:
+### Analytical Solution (OLS & SVD)
+Theoretically, the Ordinary Least Squares (OLS) approach solves the regression problem by finding the global minimum where the derivative of the cost function is zero using the **Normal Equation**:
+
 $$\theta = (X^T X)^{-1} X^T y$$
 
-However, inverting the matrix $(X^T X)$ has a computational complexity of approximately **$O(P^3)$**. In our Genomics scenario ($P=20,000$), this becomes a massive bottleneck. 
+However, direct matrix inversion is numerically unstable and computationally expensive. To solve this, industry standards like Scikit-Learn's `LinearRegression` rely on **Singular Value Decomposition (SVD)** (via LAPACK's `scipy.linalg.lstsq`) to compute the pseudoinverse. While highly accurate, SVD carries a computational and memory complexity of approximately **$O(\min(n \cdot p^2, n^2 \cdot p))$**. 
 
+In our high-dimensional Genomics scenario where $p = 20,000$, computing and storing these dense decomposed matrices at once creates a massive memory bottleneck.
 
+### The Iterative Alternative: Batch Gradient Descent
+Our custom implementation bypasses the need for matrix decomposition entirely by using **Batch Gradient Descent**. This algorithm approaches the optimal solution iteratively through the following steps:
 
-Our implementation uses **Batch Gradient Descent**, which optimizes the weights iteratively:
 1.  **Prediction:** $\hat{y} = Xw + b$
 2.  **Cost Function (MSE):** $J(w,b) = \frac{1}{n} \sum (y - \hat{y})^2$
 3.  **Gradient Update:** $w = w - \alpha \frac{\partial J}{\partial w}$
 
-By using an iterative approach, we reduce the complexity per iteration to **$O(k \cdot n \cdot p)$**, making it significantly more memory-efficient for wide datasets.
+By using this iterative approach, we avoid loading massive intermediate matrices into memory. The complexity per iteration is reduced to **$O(k \cdot n \cdot p)$**, making it significantly more resource-efficient for "Fat Matrices".
+
+### 📝 Mathematical Notation
+To ensure clarity throughout the algorithm, the variables used in the equations are defined as follows:
+* **$n$**: Number of samples or observations (e.g., 5,000 cells).
+* **$p$**: Number of features or dimensions (e.g., 20,000 genes).
+* **$k$**: Number of iterations (epochs) run during the training process.
+* **$X$**: The input feature matrix of shape $(n, p)$.
+* **$y$**: The actual target values (Ground Truth).
+* **$\hat{y}$**: The model's predicted target values.
+* **$w$ / $\theta$**: The weight vector (coefficients) of the features.
+* **$b$**: The bias term (intercept).
+* **$\alpha$**: The learning rate, which controls the step size of each update.
+* **$J$**: The cost function being minimized (Mean Squared Error).
 
 ---
 
@@ -66,13 +81,13 @@ The model demonstrated a perfect convergence path. As shown in the dashboard, ou
 ![Accuracy Dashboard](img/scenario1_accuracy_dashboard.png)
 *Left: Cost function decreasing smoothly. Right: Predicted vs. Actual values showing high accuracy.*
 
-### Scenario 2: Computational Efficiency (The "Win")
+### Scenario 2: Computational Efficiency
 In the high-dimensional Genomics test, the iterative nature of Gradient Descent proved to be more resource-efficient.
 
 ![Performance Benchmark](img/scenario2_performance_benchmark.png)
 
-* **Memory Win:** Our model achieved **~10% less peak RAM usage** by avoiding expensive matrix decompositions.
-* **Speed:** Even in pure Python, our vectorized implementation achieved a **1.44x speedup** over Scikit-Learn in this specific high-dimensional layout ($P \gg N$).
+* **Memory Win:** Our model achieved **~11% less peak RAM usage** by avoiding expensive matrix decompositions.
+* **Speed:** Even in pure Python, our vectorized implementation achieved a **3.34x speedup** over Scikit-Learn in this specific high-dimensional layout ($P \gg N$).
 
 ---
 
@@ -83,14 +98,14 @@ LINEAR-REGRESSION-FROM-SCRATCH/
 │
 ├── src/
 │   ├── __init__.py
-│   └── linear_regression_gd.py   # Core Class
+│   └── linear_regression_gd.py                      # Core Class
 │
 ├── notebooks/
-│   ├── 1_agro_case_study.ipynb            # Scenario 1: Accuracy Check
-│   └── 2_single_cell_genomics_stress_test.ipynb # Scenario 2: Scalability
+│   ├── 1_agro_case_study.ipynb                      # Scenario 1: Accuracy Check
+│   └── 2_single_cell_genomics_stress_test.ipynb     # Scenario 2: Scalability
 │
-├── img/                          # Benchmark Visualizations
-├── requirements.txt              # Dependencies
+├── img/                                             # Benchmark Visualizations
+├── requirements.txt                                 # Dependencies
 └── README.md
 
 ```
