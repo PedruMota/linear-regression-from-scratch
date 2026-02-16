@@ -22,38 +22,42 @@ To address this, this project explores the use of **Gradient Descent** as an ite
 
 ---
 
-## Theoretical Foundation & Algorithm
+## 🧠 1. Theoretical Foundation & Algorithm
 
-### Analytical Solution (OLS & SVD)
-Theoretically, the Ordinary Least Squares (OLS) approach solves the regression problem by finding the global minimum where the derivative of the cost function is zero using the **Normal Equation**:
+### The Analytical Approach (Scikit-Learn)
+While the textbook definition of Linear Regression uses the **Normal Equation** $\theta = (X^T X)^{-1} X^T y$, production-grade libraries like `scikit-learn` avoid this method due to numerical instability when features are correlated.
 
-$$\theta = (X^T X)^{-1} X^T y$$
+Instead, `sklearn.linear_model.LinearRegression` relies on **Singular Value Decomposition (SVD)** of the data matrix $X$ (specifically using LAPACK's `gelsd` driver). It decomposes the matrix such that:
+$$X = U \Sigma V^T$$
+The solver then computes the pseudo-inverse to find the weights. While numerically stable, this approach requires decomposing the entire matrix in memory, leading to a computational cost of roughly **$O(N \cdot P^2)$** or **$O(P^3)$**. In our Genomics scenario ($P=20,000$), this matrix decomposition becomes the primary memory bottleneck.
 
-However, direct matrix inversion is numerically unstable and computationally expensive. To solve this, industry standards like Scikit-Learn's `LinearRegression` rely on **Singular Value Decomposition (SVD)** (via LAPACK's `scipy.linalg.lstsq`) to compute the pseudoinverse. While highly accurate, SVD carries a computational and memory complexity of approximately **$O(\min(n \cdot p^2, n^2 \cdot p))$**. 
+### The Iterative Approach (Our Implementation)
+To bypass the memory cost of matrix decomposition, we implemented **Batch Gradient Descent**. Instead of solving the system in a single step, we optimize the weights iteratively by following the slope of the error surface.
 
-In our high-dimensional Genomics scenario where $p = 20,000$, computing and storing these dense decomposed matrices at once creates a massive memory bottleneck.
 
-### The Iterative Alternative: Batch Gradient Descent
-Our custom implementation bypasses the need for matrix decomposition entirely by using **Batch Gradient Descent**. This algorithm approaches the optimal solution iteratively through the following steps:
 
+**Algorithm Steps:**
 1.  **Prediction:** $\hat{y} = Xw + b$
-2.  **Cost Function (MSE):** $J(w,b) = \frac{1}{n} \sum (y - \hat{y})^2$
-3.  **Gradient Update:** $w = w - \alpha \frac{\partial J}{\partial w}$
+2.  **Cost Function (MSE):** $J(w,b) = \frac{1}{2n} \sum_{i=1}^{n} (y^{(i)} - \hat{y}^{(i)})^2$
+3.  **Gradient Calculation:** $\nabla J = \frac{1}{n} X^T (\hat{y} - y)$
+4.  **Weight Update:** $w = w - \alpha \cdot \nabla J$
 
-By using this iterative approach, we avoid loading massive intermediate matrices into memory. The complexity per iteration is reduced to **$O(k \cdot n \cdot p)$**, making it significantly more resource-efficient for "Fat Matrices".
+### 📉 Complexity & Notation Analysis
 
-### 📝 Mathematical Notation
-To ensure clarity throughout the algorithm, the variables used in the equations are defined as follows:
-* **$n$**: Number of samples or observations (e.g., 5,000 cells).
-* **$p$**: Number of features or dimensions (e.g., 20,000 genes).
-* **$k$**: Number of iterations (epochs) run during the training process.
-* **$X$**: The input feature matrix of shape $(n, p)$.
-* **$y$**: The actual target values (Ground Truth).
-* **$\hat{y}$**: The model's predicted target values.
-* **$w$ / $\theta$**: The weight vector (coefficients) of the features.
-* **$b$**: The bias term (intercept).
-* **$\alpha$**: The learning rate, which controls the step size of each update.
-* **$J$**: The cost function being minimized (Mean Squared Error).
+The key advantage of our approach is visible when analyzing the algorithmic complexity per step.
+
+| Symbol | Definition | Context in this Project |
+| :---: | :--- | :--- |
+| **$N$** | Number of Samples | 5,000 (Cells) |
+| **$P$** | Number of Features | 20,000 (Genes) |
+| **$k$** | Number of Iterations | e.g., 1,000 steps |
+| **$\alpha$** | Learning Rate | Step size (Hyperparameter) |
+
+**Comparative Complexity:**
+* **Analytical (SVD/OLS):** $O(N \cdot P^2)$ — *Quadratic/Cubic relative to Features.*
+* **Gradient Descent:** $O(k \cdot N \cdot P)$ — *Linear relative to Features.*
+
+By keeping the complexity linear with respect to $P$, Gradient Descent allows us to handle "Fat Matrices" ($P \gg N$) with significantly lower peak memory usage, as demonstrated in our benchmarks.
 
 ---
 
