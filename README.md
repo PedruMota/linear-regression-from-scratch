@@ -121,8 +121,8 @@ LINEAR-REGRESSION-FROM-SCRATCH/
 │   └── linear_regression_gd.py                      # Core Class
 │
 ├── notebooks/
-│   ├── 1_agro_case_study.ipynb                      # Scenario 1: Accuracy Check
-│   └── 2_single_cell_genomics_stress_test.ipynb     # Scenario 2: Scalability
+│   ├── agro_case_study.ipynb                      # Scenario 1: Accuracy Check
+│   └── single_cell_genomics_stress_test.ipynb     # Scenario 2: Scalability
 │
 ├── img/                                             # Benchmark Visualizations
 ├── requirements.txt                                 # Dependencies
