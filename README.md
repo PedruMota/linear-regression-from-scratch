@@ -8,9 +8,9 @@
 
 ## Project Overview
 
-While `sklearn.linear_model.LinearRegression` is the industry standard, its reliance on the Ordinary Least Squares (OLS) closed-form solution (**$O(P^3)$**) creates significant memory bottlenecks when handling wide datasets. 
+While `sklearn.linear_model.LinearRegression` is the industry standard, its reliance on the **Singular Value Decomposition (SVD)** analytical solution creates significant memory bottlenecks when handling high-dimensional datasets.
 
-To address this, this project explores the use of **Gradient Descent** as an iterative alternative. Instead of attempting to solve the entire system at once through costly matrix inversions, Gradient Descent approaches the optimal solution in steps. This study aims to demonstrate how this iterative process can be more resource-efficient in high-dimensional contexts, providing a practical way to manage time and memory usage without sacrificing the model's ability to learn from the data.
+To address this, this project explores the use of **Gradient Descent** as an iterative alternative. Instead of attempting to solve the entire system at once through computationally expensive matrix decompositions, Gradient Descent approaches the optimal solution in steps. This study aims to demonstrate how this iterative process can be more resource-efficient in high-dimensional contexts, providing a practical way to manage memory usage without sacrificing the model's ability to learn from the data.
 
 ### Key Features
 * **Vectorized Implementation:** Fully optimized matrix operations using NumPy (no slow `for` loops).
@@ -24,14 +24,14 @@ To address this, this project explores the use of **Gradient Descent** as an ite
 
 ## Theoretical Foundation & Algorithm
 
-### The Scikit-Learn Approach
+### Scikit-Learn Approach
 While the textbook definition of Linear Regression uses the **Normal Equation** $\theta = (X^T X)^{-1} X^T y$, production-grade libraries like `scikit-learn` avoid this method due to numerical instability when features are correlated.
 
 Instead, `sklearn.linear_model.LinearRegression` relies on **Singular Value Decomposition (SVD)** of the data matrix $X$ (specifically using LAPACK's `gelsd` driver). It decomposes the matrix such that:
 $$X = U \Sigma V^T$$
 The solver then computes the pseudo-inverse to find the weights. While numerically stable, this approach requires decomposing the entire matrix in memory, leading to a computational cost of roughly **$O(N \cdot P^2)$** or **$O(P^3)$**. In our Genomics scenario ($P=20,000$), this matrix decomposition becomes the primary memory bottleneck.
 
-### The Iterative Approach
+### Iterative Approach
 To bypass the memory cost of matrix decomposition, I have implemented **Batch Gradient Descent**. Instead of solving the system in a single step, we optimize the weights iteratively by following the slope of the error surface.
 
 
