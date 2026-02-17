@@ -8,7 +8,7 @@
 
 ## Project Overview
 
-While `sklearn.linear_model.LinearRegression` is the industry standard, its reliance on the Ordinary Least Squares (OLS) closed-form solution ($O(P^3)$) creates significant memory bottlenecks when handling wide datasets. 
+While `sklearn.linear_model.LinearRegression` is the industry standard, its reliance on the Ordinary Least Squares (OLS) closed-form solution (**$O(P^3)$**) creates significant memory bottlenecks when handling wide datasets. 
 
 To address this, this project explores the use of **Gradient Descent** as an iterative alternative. Instead of attempting to solve the entire system at once through costly matrix inversions, Gradient Descent approaches the optimal solution in steps. This study aims to demonstrate how this iterative process can be more resource-efficient in high-dimensional contexts, providing a practical way to manage time and memory usage without sacrificing the model's ability to learn from the data.
 
@@ -84,8 +84,8 @@ Beyond the core algorithm, this project tackles two critical challenges often ov
 ### Feature Scaling
 Gradient Descent is highly sensitive to the scale of input features. If one variable ranges from 0-1 (e.g., Soil pH) and another from 0-1000 (e.g., Rainfall), the cost function contours become elongated ellipses. The optimizer "zigzags" across the valley, taking much longer to reach the global minimum. So, I implemented automatic **Z-Score Normalization** inside the `fit` method:
 
-    $$x' = \frac{x - \mu}{\sigma}$$
-    This transforms the error surface into a symmetric bowl (spherical contours), allowing the gradient to point directly towards the minimum for faster and stable convergence.
+$$x' = \frac{x - \mu}{\sigma}$$
+This transforms the error surface into a symmetric bowl (spherical contours), allowing the gradient to point directly towards the minimum for faster and stable convergence.
 
 
 ### Schema Consistency
