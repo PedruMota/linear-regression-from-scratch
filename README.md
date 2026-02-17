@@ -106,8 +106,8 @@ In the high-dimensional Genomics test, the iterative nature of Gradient Descent 
 
 ![Performance Benchmark](img/scenario2_performance_benchmark.png)
 
-* **Memory Win:** Our model achieved **~11.4% less peak RAM usage** by avoiding expensive matrix decompositions.
 * **Speed:** Even in pure Python, our vectorized implementation achieved a **~1.13x speedup** over Scikit-Learn in this specific high-dimensional layout ($P \gg N$).
+* **Memory:** Our model achieved **~11.4% less peak RAM usage** by avoiding expensive matrix decompositions.
 
 ---
 
